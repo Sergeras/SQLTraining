@@ -10,9 +10,21 @@ public class SQLManipulator {
 		this.conn = conn;
 	}
 	
+	public ResultSet countStudentSet (String teacher) throws SQLException {
+		ResultSet rs = null;
+		
+		PreparedStatement sqlStatement = conn.prepareStatement(	
+				"SELECT * FROM teacher WHERE first_name = ?;");
+		
+		sqlStatement.setString(1, teacher);
+		rs = sqlStatement.executeQuery();
+		
+		return rs;
+	}
+	
 	public void createTables () {
-		try {
-			Statement sqlStatement = conn.createStatement();
+		try (Statement sqlStatement = conn.createStatement()) {
+			
 			
 			String studentTable = "CREATE TABLE student(first_name VARCHAR(15) NOT NULL,"
 					+ "last_name VARCHAR(15) NOT NULL,"
@@ -52,8 +64,8 @@ public class SQLManipulator {
 	}
 	
 	public void fillTables () {
-		try {
-			Statement sqlStatement = conn.createStatement();
+		try (Statement sqlStatement = conn.createStatement()) {
+			
 			String insert;
 			// data for student table
 			insert = "INSERT INTO student (first_name, last_name, adress, post_code, phone_number)"  
@@ -125,8 +137,6 @@ public class SQLManipulator {
 			insert ="INSERT INTO test (student_id, subject_id, date, mark, teacher_id)"  
 					+ "	VALUES (4, 'CSC', '2019-05-17', 'A', 1 );";
 			sqlStatement.executeUpdate(insert);
-			
-			
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
