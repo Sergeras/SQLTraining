@@ -2,7 +2,7 @@ package a;
 
 import java.sql.*;
 
-public class SQLManipulator {
+public class SQLManipulator implements ResultSetDisplayer {
 	
 	Connection conn = null;
 	
@@ -10,21 +10,72 @@ public class SQLManipulator {
 		this.conn = conn;
 	}
 	
-	public ResultSet countStudentSet (String teacher) throws SQLException {
-		ResultSet rs = null;
-		
+	public ResultSet selectAllTests () throws SQLException {
+		PreparedStatement sqlStatement = conn.prepareStatement(
+				"SELECT s.first_name, s.last_name, t.subject_id, t.mark, t.date "
+				+ "FROM test t "
+				+ "INNER JOIN student s "
+				+ "ON t.student_id = s.student_id");
+		return sqlStatement.executeQuery();
+				
+	}
+	
+	public ResultSet selectTeacher (String teacherFirstName) throws SQLException {
 		PreparedStatement sqlStatement = conn.prepareStatement(	
 				"SELECT * FROM teacher WHERE first_name = ?;");
+		sqlStatement.setString(1, teacherFirstName);
 		
-		sqlStatement.setString(1, teacher);
-		rs = sqlStatement.executeQuery();
+		return sqlStatement.executeQuery();
+	}
+	
+	public ResultSet selectStudent (String studentFirstName) throws SQLException {
+		PreparedStatement sqlStatement = conn.prepareStatement(
+				"SELECT * FROM student WHERE first_name = ?");
+		sqlStatement.setString(1, studentFirstName);
 		
-		return rs;
+		return sqlStatement.executeQuery();
+	}
+	
+	public ResultSet selectTestByStudentName (String studentName) throws SQLException {
+		PreparedStatement sqlStatement = conn.prepareStatement(
+				"SELECT s.first_name, s.last_name, t.subject_id, t.mark "
+				+ "FROM test t "
+				+ "INNER JOIN student s "
+				+ "ON t.student_id = s.student_id "
+				+ "WHERE s.first_name = ?");
+		sqlStatement.setString(1, studentName);
+		
+		return sqlStatement.executeQuery();
+	}
+	
+	public ResultSet selectTestByTeacherName (String teacherName) throws SQLException {
+		PreparedStatement sqlStatement = conn.prepareStatement(
+				"SELECT te.first_name, te.last_name, t.subject_id, t.date "
+				+ "FROM test t "
+				+ "INNER JOIN teacher te "
+				+ "ON t.teacher_id = te.teacher_id "
+				+ "WHERE te.first_name = ?");
+		sqlStatement.setString(1, teacherName);
+		
+		return sqlStatement.executeQuery();
+	}
+	
+	public ResultSet selectAllStudents () throws SQLException {
+		PreparedStatement sqlStatement = conn.prepareStatement(
+				"SELECT * FROM student");
+		
+		return sqlStatement.executeQuery();
+	}
+	
+	public ResultSet selectAllTeachers () throws SQLException {
+		PreparedStatement sqlStatement = conn.prepareStatement(
+				"SELECT * FROM teacher");
+		
+		return sqlStatement.executeQuery();
 	}
 	
 	public void createTables () {
 		try (Statement sqlStatement = conn.createStatement()) {
-			
 			
 			String studentTable = "CREATE TABLE student(first_name VARCHAR(15) NOT NULL,"
 					+ "last_name VARCHAR(15) NOT NULL,"
@@ -39,8 +90,8 @@ public class SQLManipulator {
 					+ "post_code VARCHAR (9) NOT NULL,"
 					+ "phone_number INT);";		
 			String subjectTable = "CREATE TABLE subject(subject_name VARCHAR(30) NOT NULL,"
-					+"subject_id VARCHAR(3),"
-					+"teacher_id INT FOREIGN KEY REFERENCES teacher (teacher_id),"
+					+ "subject_id VARCHAR(3),"
+					+ "teacher_id INT FOREIGN KEY REFERENCES teacher (teacher_id),"
 					+ "PRIMARY KEY (subject_id, teacher_id));";
 			String testTable = "CREATE TABLE test(test_id INT IDENTITY (1,1),"
 					+ "student_id INT NOT NULL,"

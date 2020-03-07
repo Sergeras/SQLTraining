@@ -4,31 +4,29 @@ import java.sql.*;
 
 
 
-public class SQLTraining {
+public class SQLTraining implements ResultSetDisplayer  {
 	public static void main (String[] args) {
 		
-		
 		try (Connection conn = new SQLConnector().getConnection()) {
-			ResultSet  rs = null;
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			
 			SQLManipulator sql = new SQLManipulator(conn);
-			//sql.createTables();
-			//sql.fillTables();
-			rs = sql.countStudentSet("Maria");
 			
-			while (rs.next()) {
-				StringBuffer buff = new StringBuffer();
-				
-				buff.append( rs.getString(1) +" ");
-				buff.append( rs.getString(2) +" ");
-				buff.append( rs.getInt(3) +" ");
-				buff.append( rs.getString(4) +" ");
-				buff.append( rs.getString(5) +" ");
-				buff.append( rs.getInt(6) +" ");
-				
-				System.out.println(buff.toString());
-			}
+			sql.createTables();
+			sql.fillTables();
+			
+			System.out.println("-----------Students-----------");
+			sql.display(sql.selectAllStudents());
+			System.out.println("-----------Teachers-----------");
+			sql.display(sql.selectAllTeachers());
+			System.out.println("-----------Tests-----------");
+			sql.display(sql.selectAllTests());
+			System.out.println("-----------Selects-----------");
+			sql.display(sql.selectTeacher("Maria"));
+			sql.display(sql.selectStudent("Frank"));
+			sql.display(sql.selectTestByStudentName("Frank"));
+			sql.display(sql.selectTestByTeacherName("Maria"));
+			
 		}
 		catch (SQLException e) {
 			System.out.println(e.getMessage());
